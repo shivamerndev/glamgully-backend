@@ -13,10 +13,11 @@ connectDB()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
-app.use(cors({
-    origin: ['https://glamgully.vercel.app/'],
-    credentials: true,
-}))
+// app.use(cors({
+//     origin: 'https://glamgully.vercel.app/',
+//     credentials: true,
+// }))
+app.use(cors())
 app.get("/", (req, res) => { res.send("Welcome To Backend Of GlamGully.") })
 
 app.use("/admin", adminRouter)
