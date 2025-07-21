@@ -10,13 +10,16 @@ dotenv.config()
 const port = process.env.PORT || 3000;
 const app = express()
 connectDB()
-app.use(express.json())
-app.use(express.urlencoded({ extended: true })) 
-app.use(cookieParser())
+
 app.use(cors({
-    origin: ["https://glamgully-client.vercel.app",'http://localhost:5173'],
-    credentials: true,
-}))
+    origin: "https://glamgully.vercel.app",
+    credentials: true
+}));
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
+
 app.get("/", (req, res) => { res.send("Welcome To Backend Of GlamGully.") })
 
 app.use("/admin", adminRouter)
