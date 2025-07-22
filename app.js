@@ -9,7 +9,6 @@ import cookieParser from "cookie-parser"
 dotenv.config()
 const port = process.env.PORT || 3000;
 const app = express()
-connectDB()
 
 app.use(cors({
     origin: "https://glamgully.vercel.app",
@@ -26,4 +25,14 @@ app.use("/admin", adminRouter)
 app.use("/product", productRouter)
 app.use("/users", customerRouter)
 
-app.listen(port, () => { console.log('listening on port', port) })
+const startserver = async () => {
+    try {
+        await connectDB()
+        app.listen(port, () => {
+            console.log('Server running on port 🚀', port);
+        })
+    } catch (error) {
+        console.error('Connection failed ❌', error)
+    }
+}
+startserver()
