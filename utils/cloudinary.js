@@ -15,7 +15,7 @@ export const getCloudinaryResponse = async (file) => {
         const base64 = file.buffer.toString("base64");
         const fileuri = `data:${mimeType};base64,${base64}`; // data:image/jpeg;base64,(file.buffer.toString("base64"))
         const result = await cloudinary.uploader.upload(fileuri, {
-            folder: "products",
+            folder: "GlamGully Products",
         });
         return result.secure_url;
     } catch (error) {
@@ -23,5 +23,21 @@ export const getCloudinaryResponse = async (file) => {
     }
 }
 
+// ✅ Multiple files handler
+export const uploadMultipleImages = async (files) => {
+    try {
+        const urls = [];
+
+        for (const file of files) {
+            const url = await getCloudinaryResponse(file);
+            if (url) urls.push(url);
+        }
+
+        return urls; // ✅ array of secure URLs
+    } catch (err) {
+        console.log("Multiple image upload error:", err.message);
+        return [];
+    }
+};
 
 export default cloudinary;

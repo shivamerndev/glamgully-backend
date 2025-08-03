@@ -1,17 +1,19 @@
 import productModel from "../models/product.model.js";
 import { productValidator } from "../validator/product.validator.js"
-import { getCloudinaryResponse } from "../utils/cloudinary.js"
+import { getCloudinaryResponse, uploadMultipleImages } from "../utils/cloudinary.js"
 
 export const createProduct = async (req, res) => {
     try {
         const { title, price, discount, description, category, quantity } = req.body;
-        const productimage = req.file;
+        // const productimage = req.file;
+        const productimage = req.files;
         const { error } = productValidator(req.body)
         if (error) return res.status(400).json({ error_message: error.details[0].message })
         if (!productimage) return res.status(400).json({ error: "Product image is required" })
-        const imageurl = await getCloudinaryResponse(productimage)
+        // const imageurl = await getCloudinaryResponse(productimage)
+        const imageurls = await uploadMultipleImages(productimage)
         const Product = await productModel.create({
-            productimage: imageurl,
+            productimage: imageurls,
             title,
             price,
             discount,
@@ -35,7 +37,7 @@ export const getAllProducts = async (req, res) => {
 }
 export const getAllProductsAdmin = async (req, res) => {
     try {
-        const products = await productModel.find()
+        const products = await productModel.find().select('-productimage');
         res.status(200).send(products)
     } catch (error) {
         res.send(error.message)
