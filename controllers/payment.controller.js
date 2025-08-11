@@ -38,7 +38,7 @@ export const verifyPayment = (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-        const payment = paymodel.create({
+        const payment =  paymodel.create({
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature

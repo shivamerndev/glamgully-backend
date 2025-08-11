@@ -4,10 +4,20 @@ export const createNew = async (req, res) => {
     try {
         const { fullname, phone } = req.body;
         if (!fullname || !phone) return res.status(400).send("All feilds are required.")
+        const isExisted = customerModel.findOne({ phone })
+        if (isExisted) return res.status(400).send("thank u for shopping again.")
         const customer = await customerModel.create({
             fullname, phone
         })
         res.status(201).send(customer)
+    } catch (error) {
+        res.send(error.message)
+    }
+}
+export const allCustomer = async (req, res) => {
+    try {
+        const customers = await customerModel.find()
+        res.status(200).send(customers)
     } catch (error) {
         res.send(error.message)
     }

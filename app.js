@@ -3,6 +3,7 @@ import adminRouter from "./routes/admin.route.js"
 import productRouter from "./routes/product.route.js"
 import customerRouter from './routes/customer.route.js'
 import paymentRouter from './routes/payment.route.js';
+import reviewRouter from './routes/comment.route.js';
 
 import connectDB from "./db/db.connect.js"
 import cors from "cors"
@@ -27,6 +28,7 @@ app.get("/", (req, res) => { res.send("Welcome To Backend Of GlamGully.") })
 app.use("/admin", adminRouter)
 app.use("/product", productRouter)
 app.use("/users", customerRouter)
+app.use("/review", reviewRouter)
 app.use("/pay", paymentRouter);
 
 app.listen(port, () => { console.log('listening on port', port) })

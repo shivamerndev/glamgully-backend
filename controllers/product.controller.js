@@ -29,15 +29,60 @@ export const createProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
     try {
-        const products = await productModel.find({ isActive: { $ne: false } })
-        res.status(200).send(products)
+        const page = parseInt(req.query.page) || 1;       // current page
+        const limit = parseInt(req.query.limit) || 8;    // products per page
+        const sort = req.query.sort || "atz"; // default sort
+        const skip = (page - 1) * limit;                  // how many to skip
+
+        // Total active products
+        const total = await productModel.countDocuments({ isActive: { $ne: false } });
+        const instock = await productModel.countDocuments({ isActive: { $ne: false }, quantity: { $gt: 0 } });
+
+        // sort products
+        let sortOption = {};
+        switch (sort) {
+            case "atz": sortOption = { title: 1 }; break;         // A-Z
+            case "zta": sortOption = { title: -1 }; break;        // Z-A
+            case "lth": sortOption = { price: 1 }; break;        // Low to High
+            case "htl": sortOption = { price: -1 }; break;       // High to Low
+            case "otn": sortOption = { createdAt: 1 }; break;    // Old to New
+            case "nto": sortOption = { createdAt: -1 }; break;   // New to Old
+        }
+
+        // Paged products
+        const products = await productModel
+            .find({ isActive: { $ne: false } })
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            products,
+            page,
+            totalPages: Math.ceil(total / limit),
+            totalProducts: total,
+            instockProducts: instock,
+        });
     } catch (error) {
-        res.send(error.message)
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const bestSellingProducts = async (req, res) => {
+    try {
+        const products = await productModel
+            .find({ isActive: { $ne: false }, price: { $gt: 499 } })
+            .sort({ title: -1 })
+            .limit(10);
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 }
+
 export const getAllProductsAdmin = async (req, res) => {
     try {
-        const products = await productModel.find().select('-productimage');
+        const products = await productModel.find().select('-productimage').sort({ createdAt: -1 });
         res.status(200).send(products)
     } catch (error) {
         res.send(error.message)
@@ -96,5 +141,26 @@ export const searchProduct = async (req, res) => {
         res.status(200).json(products);
     } catch (error) {
         res.send(error.message)
+    }
+}
+export const productFilter = async (req, res) => {
+    const { availablity, priceRange } = req.body;
+    try {
+        const filter = {};
+        if (availablity.instock) {
+            filter.quantity = { $gt: 0 };
+        }
+        if (availablity.outstock) {
+            filter.quantity = { $lte: 0 };
+        }
+        if (priceRange && priceRange.from !== undefined && priceRange.to !== undefined) {
+            filter.price = { $gte: priceRange.from, $lte: priceRange.to };
+        } 
+        // console.log(filter);
+
+        const products = await productModel.find(filter);
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 }
