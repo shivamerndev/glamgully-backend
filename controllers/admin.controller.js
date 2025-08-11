@@ -43,7 +43,7 @@ export const adminLogin = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,      // JS se access na ho
       secure: process.env.NODE_ENV === "production", // HTTPS only in production
-      sameSite: "strict",  // CSRF protection
+      sameSite: "none",  // CSRF protection
       maxAge: 24 * 60 * 60 * 1000 // 1 din
     });
     res.json({ message: 'Logged in successfully' });

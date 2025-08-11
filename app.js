@@ -15,7 +15,7 @@ const app = express()
 connectDB()
 
 app.use(cors({
-    origin: ["https://glamgully.vercel.app", "http://localhost:5173"],
+    origin: "https://glamgully.vercel.app",
     credentials: true
 }));
 
