@@ -3,6 +3,7 @@ import adminRouter from "./routes/admin.route.js"
 import productRouter from "./routes/product.route.js"
 import customerRouter from './routes/customer.route.js'
 import paymentRouter from './routes/payment.route.js';
+import orderRouter from './routes/order.route.js';
 import reviewRouter from './routes/comment.route.js';
 
 import connectDB from "./db/db.connect.js"
@@ -16,6 +17,7 @@ connectDB()
 
 app.use(cors({
     origin: "https://glamgully.vercel.app",
+    // origin: "http://localhost:5173",
     credentials: true
 }));
 
@@ -30,5 +32,6 @@ app.use("/product", productRouter)
 app.use("/users", customerRouter)
 app.use("/review", reviewRouter)
 app.use("/pay", paymentRouter);
+app.use("/order", orderRouter);
 
 app.listen(port, () => { console.log('listening on port', port) })

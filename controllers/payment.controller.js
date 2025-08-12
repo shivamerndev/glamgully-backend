@@ -1,6 +1,7 @@
 import Razorpay from 'razorpay';
 import paymodel from '../models/payment.model.js';
 import crypto from 'crypto';
+import twilio from 'twilio';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -8,6 +9,44 @@ const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
 });
+
+// Twilio Client
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+// product Formatter
+const ProductFormatter = (products) => {
+    if (products.length > 0) {
+        return products
+            .map(p => `${p.title}: ${p.quantity}`)
+            .join("\n"); // har product ek nayi line pe
+    }
+    return `${products.title}: ${products.quantity}`
+};
+
+// 🧾  Address Formatter
+const formatAddress = (addr) => {
+    const { address, landmark, city, state, pincode } = addr;
+    return `${address}, ${landmark || ""}, ${city}, ${state} - ${pincode}`;
+};
+// WhatsApp notification function
+const sendAdminWhatsApp = async (orderId, amount, address, products) => {
+    try {
+        await client.messages.create({
+            from: process.env.TWILIO_WHATSAPP_NUMBER, // Twilio Sandbox number
+            body: `✅ New payment received!\nOrder ID: ${orderId}\nAmount: ₹${amount / 100}\nAddress: ${formatAddress(address)}\n ⬇️⬇️ Products : Quantity ⬇️⬇️\n ${ProductFormatter(products)}`,
+            // contentSid: 'HX350d429d32e64a552466cafecbe95f3c', // Tumhara template SID
+            // contentVariables: JSON.stringify({
+            //     "1": orderId,            // Template ka {1}
+            //     "2": `₹${amount / 100}`, // Template ka {2}
+            //     "3": address
+            // }),
+            to: process.env.ADMIN_WHATSAPP // Admin ka WhatsApp number (sandbox join kiya ho)
+        });
+        console.log("✅ WhatsApp notification sent to admin");
+    } catch (err) {
+        console.error("❌ Failed to send WhatsApp:", err);
+    }
+};
 
 export const createOrder = async (req, res) => {
     const { amount } = req.body;
@@ -26,8 +65,9 @@ export const createOrder = async (req, res) => {
     }
 }
 
-export const verifyPayment = (req, res) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+export const verifyPayment = async (req, res) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, address, products } = req.body;
+
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
 
@@ -38,11 +78,14 @@ export const verifyPayment = (req, res) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-        const payment =  paymodel.create({
+        const payment = paymodel.create({
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature
         })
+        // ✅ Send WhatsApp Notification to Admin
+        await sendAdminWhatsApp(razorpay_order_id, amount, address, products);
+
         res.status(200).json({ payment: payment, message: "Payment successfully" });
     }
 }

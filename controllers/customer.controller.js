@@ -5,7 +5,7 @@ export const createNew = async (req, res) => {
         const { fullname, phone } = req.body;
         if (!fullname || !phone) return res.status(400).send("All feilds are required.")
         const isExisted = await customerModel.findOne({ phone:phone }) 
-        if (isExisted) return res.status(400).send("thank u for shopping again.")
+        if (isExisted) return res.status(400).send("thank you so much for shopping again.")
         const customer = await customerModel.create({
             fullname, phone
         })
