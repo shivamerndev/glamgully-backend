@@ -13,7 +13,7 @@ const orderSchema = mongoose.Schema({
         type: String,
         required: true
     }
-})
+}, { timestamps: true })
 
 const orderModel = mongoose.model("order", orderSchema)
 

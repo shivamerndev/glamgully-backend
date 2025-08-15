@@ -12,6 +12,7 @@ vercel.jsona
 dist
 dist-ssr
 *.local
+firebase-admin-key.json
 
 # Editor directories and files
 .vscode/*

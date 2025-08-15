@@ -89,3 +89,39 @@ export const verifyPayment = async (req, res) => {
         res.status(200).json({ payment: payment, message: "Payment successfully" });
     }
 }
+// ✅ Razorpay Webhook
+export const razorpayWebhook = async (req, res) => {
+    try {
+        const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+        const receivedSig = req.headers['x-razorpay-signature'];
+
+        const generatedSig = crypto
+            .createHmac('sha256', webhookSecret)
+            .update(JSON.stringify(req.body))
+            .digest('hex');
+
+        if (generatedSig !== receivedSig) {
+            return res.status(400).json({ message: "Invalid signature" });
+        }
+
+        // Webhook me data aayega
+        const event = req.body.event;
+        if (event === "payment.captured") {
+            const payload = req.body.payload.payment.entity;
+            console.log("✅ Payment captured:", payload);
+
+            // WhatsApp Notification bhejna
+            await sendAdminWhatsApp(
+                payload.order_id,
+                payload.amount,
+                { address: "Webhook address", city: "", state: "", pincode: "" }, // Optional: yaha order DB se real address fetch karna better hai
+                [] // Optional: yaha products bhi fetch karke bhejna
+            );
+        }
+
+        res.status(200).json({ message: "Webhook received" });
+    } catch (err) {
+        console.error("❌ Webhook error:", err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};

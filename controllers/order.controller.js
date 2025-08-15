@@ -14,9 +14,19 @@ export const createOrder = async (req, res) => {
 }
 export const readOrder = async (req, res) => {
     try {
-        const allorders = await orderModel.find()
-        res.status(200).send(allorders);
+        const totalOrders = await orderModel.countDocuments();
+        const allOrders = await orderModel.find().sort({ createdAt: -1 });
+        res.status(200).json({
+            success: true,
+            count: totalOrders,
+            total: allOrders
+        });
     } catch (error) {
-        res.send(error)
+        console.error("Error fetching orders:", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch orders",
+            error: error.message
+        });
     }
-}
+};
