@@ -1,5 +1,5 @@
 import express from "express"
-import { bestSellingProducts, createProduct, deleteProduct, editProduct, getAllProducts, getAllProductsAdmin, getSingleProduct, productFilter, searchProduct } from "../controllers/product.controller.js";
+import { bestSellingProducts, createProduct, deleteProduct, editProduct, getAllProducts, getAllProductsAdmin, getSingleProduct, productCategory, productCategoryArchieve, productCategorypublic, productCategoryUnArchieve, productFilter, searchProduct } from "../controllers/product.controller.js";
 import adminAuth from "../middlewares/admin.auth.js";
 import upload from "../config/multer.config.js";
 import productModel from "../models/product.model.js";
@@ -23,5 +23,9 @@ Router.get("/highest/price", async (req, res) => {
         res.status(400).send(error.message)
     }
 })
+Router.get("/find/category",productCategory)
+Router.get("/find/category/public",productCategorypublic)
+Router.post("/archive/category",productCategoryArchieve)
+Router.post("/active/category",productCategoryUnArchieve)
 
 export default Router;

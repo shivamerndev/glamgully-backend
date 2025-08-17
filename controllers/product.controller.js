@@ -155,12 +155,56 @@ export const productFilter = async (req, res) => {
         }
         if (priceRange && priceRange.from !== undefined && priceRange.to !== undefined) {
             filter.price = { $gte: priceRange.from, $lte: priceRange.to };
-        } 
+        }
         // console.log(filter);
 
         const products = await productModel.find(filter);
         res.json(products);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+}
+export const productCategory = async (req, res) => {
+    try {
+        const categories = await productModel.distinct("category");
+        // const trimmedCategories = categories.filter(c => c == c.trim());
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+export const productCategorypublic = async (req, res) => {
+    try {
+        const categories = await productModel.distinct("category", { isActive: true });
+        res.status(200).json(categories);
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+export const productCategoryArchieve = async (req, res) => {
+    const { category } = req.body;
+
+    try {
+        const result = await productModel.updateMany(
+            { category: category },
+            { $set: { isActive: false } }
+        );
+        res.json({ message: "All products in this category archived.", result });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+}
+export const productCategoryUnArchieve = async (req, res) => {
+    const { category } = req.body;
+    try {
+        const result = await productModel.updateMany(
+            { category: category },
+            { $set: { isActive: true } }
+        );
+        res.json({ message: "All products in this category Active.", result });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message })
     }
 }
