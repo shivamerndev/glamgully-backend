@@ -5,7 +5,7 @@ import { createCustomerImage, readCustomerImage } from '../controllers/reviews.c
 
 const router = express.Router()
 
-router.post('/create', adminAuth, upload.single("reviewimg"), createCustomerImage)
+router.post('/create', upload.single("reviewimg"), createCustomerImage)
 router.get('/read', readCustomerImage)
 
 export default router;

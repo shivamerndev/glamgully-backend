@@ -7,12 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 .env
+.env5
 node_modules
 vercel.jsona
 dist
 dist-ssr
 *.local
 firebase-admin-key.json
+Nehajsonkey.json
 
 # Editor directories and files
 .vscode/*
